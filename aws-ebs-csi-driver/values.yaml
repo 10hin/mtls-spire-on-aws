@@ -1,0 +1,11 @@
+controller:
+  serviceAccount:
+    create: false
+storageClasses:
+  - name: gp3
+    volumeBindingMode: WaitForFirstConsumer
+    reclaimPolicy: Delete
+    parameters:
+      iops: "3000"
+      throughput: "125"
+      tagSpecification_1: 'Purpose=MTLSSpireOnAWS'

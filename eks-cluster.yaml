@@ -1,0 +1,80 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: mtls-spire-on-aws
+  region: ap-northeast-1
+  version: '1.30'
+  tags:
+    Purpose: MTLSSpireOnAWS
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: aws-load-balancer-controller
+        namespace: kube-system
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+      tags:
+        Purpose: MTLSSpireOnAWS
+    - metadata:
+        name: ebs-csi-controller-sa
+        namespace: kube-system
+      wellKnownPolicies:
+        ebsCSIController: true
+      tags:
+        Purpose: MTLSSpireOnAWS
+    - metadata:
+        name: external-secrets
+        namespace: external-secrets
+      attachPolicy: {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:CreateSecret",
+              "secretsmanager:PutSecretValue",
+              "secretsmanager:TagResource",
+              "secretsmanager:DeleteSecret"
+            ],
+            "Resource": [
+              # Wild card used for account id segment to avoid commiting AWS Account ID to git repository
+              "arn:aws:secretsmanager:ap-northeast-1:*:secret:*"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ssm:GetParameter*",
+            ],
+            "Resource": [
+              # Wild card used for account id segment to avoid commiting AWS Account ID to git repository
+              "arn:aws:ssm:ap-northeast-1:*:parameter/*"
+            ]
+          },
+        ]
+      }
+      tags:
+        Purpose: MTLSSpireOnAWS
+
+managedNodeGroups:
+  - name: main
+    minSize: 1
+    maxSize: 1
+    desiredCapacity: 1
+    privateNetworking: true
+    tags:
+      Purpose: MTLSSpireOnAWS
+
+# fargateProfiles:
+#   - name: main
+#     selectors:
+#       - namespace: default
+#       - namespace: kube-system
+#       - namespace: external-secrets
+#       - namespace: cert-manager
+#       - namespace: spire-server
+#     tags:
+#       Purpose: MTLSSpireOnAWS
