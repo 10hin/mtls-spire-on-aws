@@ -1,0 +1,10 @@
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+
+name: spire-local
+
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: /var/opt/mtls-spire-on-aws/local-spire/control-plane/data/opt/local-path-provisioner
+        containerPath: /opt/local-path-provisioner

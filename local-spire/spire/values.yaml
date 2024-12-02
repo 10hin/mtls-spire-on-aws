@@ -1,0 +1,4 @@
+global:
+  spire:
+    persistence:
+      storageClass: standard
