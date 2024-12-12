@@ -21,11 +21,21 @@ spec:
       containers:
       - env:
         - name: SPRING_PROFILES_ACTIVE
-          value: kind
+          value: spiffe
+        - name: SPIFFE_ENDPOINT_SOCKET
+          value: unix:/run/spire/sockets/spire-agent.sock
         image: client:0.0.1-SNAPSHOT
         name: client
         ports:
         - containerPort: 8080
         resources: {}
+        volumeMounts:
+        - name: java-security
+          mountPath: /layers/paketo-buildpacks_bellsoft-liberica/java-security-properties/java-security.properties
+          subPath: java-security.properties
       serviceAccountName: client
+      volumes:
+      - name: java-security
+        configMap:
+          name: client-java-security
 status: {}

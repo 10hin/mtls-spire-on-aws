@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
@@ -24,11 +25,16 @@ public class ClientMainController {
     public ClientMainController(
         @Value("${client.backend.base_url}")
         final String baseURL,
-        final RestTemplateBuilder builder
+        final RestTemplateBuilder builder,
+        final SslBundles sslBundles
     ) {
         this.backendBaseURL = baseURL;
-        this.backendClient = builder.rootUri(this.backendBaseURL)
-            .build();
+        builder.rootUri(this.backendBaseURL);
+        if (sslBundles.getBundleNames().contains("Spiffe")) {
+            final var spiffeBundle = sslBundles.getBundle("Spiffe");
+            builder.sslBundle(spiffeBundle);
+        }
+        this.backendClient = builder.build();
     }
 
     @RequestMapping(method={RequestMethod.GET,RequestMethod.POST}, path="/hello")
