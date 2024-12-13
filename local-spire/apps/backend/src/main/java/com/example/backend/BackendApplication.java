@@ -1,19 +1,9 @@
 package com.example.backend;
 
-import java.io.File;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.KeyManagementException;
-import java.security.Provider;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -26,45 +16,22 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.catalina.Context;
-import org.apache.catalina.Host;
-import org.apache.catalina.connector.Connector;
-import org.apache.catalina.startup.Tomcat;
-import org.apache.coyote.ProtocolHandler;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.ssl.SslBundleRegistrar;
-import org.springframework.boot.autoconfigure.web.servlet.TomcatServletWebServerFactoryCustomizer;
 import org.springframework.boot.ssl.SslBundle;
-import org.springframework.boot.ssl.SslBundleKey;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.ssl.SslManagerBundle;
-import org.springframework.boot.ssl.SslOptions;
-import org.springframework.boot.ssl.SslStoreBundle;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.embedded.tomcat.TomcatWebServer;
-import org.springframework.boot.web.server.WebServer;
-import org.springframework.boot.web.server.WebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
-import org.springframework.core.io.ResourceLoader;
-
 import io.spiffe.provider.SpiffeProvider;
-import io.spiffe.provider.SpiffeSslContextFactory;
-import io.spiffe.provider.SpiffeSslContextFactory.SslContextOptions;
-import io.spiffe.workloadapi.DefaultX509Source;
-import io.spiffe.workloadapi.DefaultX509Source.X509SourceOptions;
 
 
 @SpringBootApplication
@@ -78,12 +45,6 @@ public class BackendApplication {
 	private static final String SPIFFE_PROTOCOL = "TLS";
 
 	public static void main(String[] args) throws Exception {
-		final var securityPropertyLocation = System.getProperty("java.security.properties");
-		System.out.println("securityPropertyLocation = " + securityPropertyLocation);
-		Files.lines(Paths.get(securityPropertyLocation)).forEach(System.out::println);
-		final var providerClass = Security.getProperty("security.provider.2");
-		System.out.println("proiderClass = " + providerClass);
-
 		SpringApplication.run(BackendApplication.class, args);
 	}
 
@@ -91,91 +52,22 @@ public class BackendApplication {
 	@Profile("spiffe")
 	SslBundleRegistrar sslBundleCustomizer() throws Exception {
 
-		if (Files.exists(Paths.get("/run/"))) {
-			System.out.println("EXISTS /run/");
-		} else {
-			System.out.println("NOT EXISTS /run/");
-		}
-		if (Files.exists(Paths.get("/run/spire/"))) {
-			System.out.println("EXISTS /run/spire/");
-		} else {
-			System.out.println("NOT EXISTS /run/spire/");
-		}
-		if (Files.exists(Paths.get("/run/spire/sockets/"))) {
-			System.out.println("EXISTS /run/spire/sockets/");
-			System.out.println("ls /run/spire/sockets/: " + Files.list(Paths.get("/run/spire/sockets/")).toList());
-		} else {
-			System.out.println("NOT EXISTS /run/spire/sockets/");
-		}
-		if (Files.exists(Paths.get("/run/spire/sockets/spire-agent.sock"))) {
-			System.out.println("EXISTS /run/spire/sockets/spire-agent.sock");
-		} else {
-			System.out.println("NOT EXISTS /run/spire/sockets/spire-agent.sock");
-		}
 		SpiffeProvider.install();
 		final var keyManagerFactory = KeyManagerFactory.getInstance(SPIFFE_ALGORITHM, SPIFFE_PROVIDER);
 		final var trustManagerFactory = TrustManagerFactory.getInstance(SPIFFE_ALGORITHM, SPIFFE_PROVIDER);
 		final var spiffeSslBundle = SslBundle.of(null, null, null, SPIFFE_PROTOCOL, SslManagerBundle.of(keyManagerFactory, trustManagerFactory));
 
-		final SslBundle spiffeSslBundleWrapper = new SslBundle() {
-
-			@Override
-			public SslStoreBundle getStores() {
-				return spiffeSslBundle.getStores();
-			}
-
-			@Override
-			public SslBundleKey getKey() {
-				return spiffeSslBundle.getKey();
-			}
-
-			@Override
-			public SslOptions getOptions() {
-				return spiffeSslBundle.getOptions();
-			}
-
-			@Override
-			public String getProtocol() {
-				return spiffeSslBundle.getProtocol();
-			}
-
-			@Override
-			public SslManagerBundle getManagers() {
-				return spiffeSslBundle.getManagers();
-			}
-
-			@Override
-			public SSLContext createSslContext() {
-				try {
-					final var srcOpts = X509SourceOptions.builder()
-						.spiffeSocketPath("unix:/run/spire/sockets/spire-agent.sock")
-						.build();
-					SslContextOptions opts = SslContextOptions.builder()
-						.x509Source(DefaultX509Source.newSource(srcOpts))
-						.acceptAnySpiffeId()
-						.build();
-					return SpiffeSslContextFactory.getSslContext(opts);
-				} catch (final Exception ex) {
-					throw new InternalError(ex);
-				}
-			}
-
-		};
-
 		return (registry) -> {
-			registry.registerBundle("Spiffe", spiffeSslBundleWrapper);
+			registry.registerBundle("Spiffe", spiffeSslBundle);
 		};
 	}
 
 	@Bean
 	@Profile("spiffe")
 	WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer(final SslBundles bundles) {
-		System.out.println("===== tomcatCustomizer called");
 		return factory -> {
-			System.out.println("===== WebServerFactoryCustomizer called");
 			factory.setProtocol(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
 			factory.addConnectorCustomizers(connector -> {
-				System.out.println("===== ConnectorCustomizer called");
 				final var spiffeBundle = bundles.getBundle("Spiffe");
 				if (spiffeBundle == null) {
 					throw new InternalError("SPIFFE Bundle not found!");
@@ -200,8 +92,6 @@ public class BackendApplication {
 					LOGGER.info("protocol handler class is not AbstractHttp11Protocol: {}", handler.getClass());
 				}
 			});
-			factory.setSsl(null);
-			factory.setSslBundles(null);
 		};
 	}
 
@@ -259,18 +149,5 @@ public class BackendApplication {
 			}
 		};
 	}
-
-	@Bean
-	// @Profile("spiffe")
-	CommandLineRunner bundleCheck(SslBundles sslBundles, WebServerFactory ignoredFactory) {
-		return args -> {
-			System.out.println("===== all bundles =====");
-			for (final var bundleName : sslBundles.getBundleNames()) {
-				System.out.println("  - " + bundleName);
-			}
-			System.out.println("-----==========-----");
-		};
-	}
-
 
 }
