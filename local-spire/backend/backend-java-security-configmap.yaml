@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-java-security
+  namespace: default
+data:
+  java-security.properties: |
+    security.provider.2=io.spiffe.provider.SpiffeProvider
+    ssl.KeyManagerFactory.algorithm=Spiffe
+    ssl.TrustManagerFactory.algorithm=Spiffe
+    ssl.spiffe.acceptAll=true

@@ -1,0 +1,8 @@
+# Add the spiffe provider, change the <n> for the correct consecutive number
+security.provider.2=io.spiffe.provider.SpiffeProvider
+
+# Configure the default KeyManager and TrustManager factory algorithms 
+ssl.KeyManagerFactory.algorithm=Spiffe
+ssl.TrustManagerFactory.algorithm=Spiffe
+
+ssl.spiffe.acceptAll=true

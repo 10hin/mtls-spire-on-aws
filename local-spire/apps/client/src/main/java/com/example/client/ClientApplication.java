@@ -18,7 +18,7 @@ public class ClientApplication {
 
 	private static final String SPIFFE_ALGORITHM = "Spiffe";
 	private static final String SPIFFE_PROVIDER = "Spiffe";
-	private static final String SPIFFE_PROTOCOL = "Spiffe";
+	private static final String SPIFFE_PROTOCOL = "TLS";
 
 	public static void main(String[] args) {
 		SpringApplication.run(ClientApplication.class, args);

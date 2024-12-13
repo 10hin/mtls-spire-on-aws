@@ -1,0 +1,6 @@
+server:
+  ssl:
+    enabled: false
+client:
+  backend:
+    base_url: https://backend.default.svc.cluster.local
