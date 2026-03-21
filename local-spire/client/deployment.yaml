@@ -33,9 +33,16 @@ spec:
         - name: java-security
           mountPath: /layers/paketo-buildpacks_bellsoft-liberica/java-security-properties/java-security.properties
           subPath: java-security.properties
+        - name: spire-agent-socket
+          mountPath: /run/spire/sockets
       serviceAccountName: client
       volumes:
       - name: java-security
         configMap:
           name: client-java-security
+      - name: spire-agent-socket
+        hostPath:
+          # path: /run/spire/sockets
+          path: /run/spire/agent-sockets
+          type: Directory
 status: {}

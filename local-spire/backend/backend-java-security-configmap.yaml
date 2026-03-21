@@ -8,4 +8,5 @@ data:
     security.provider.2=io.spiffe.provider.SpiffeProvider
     ssl.KeyManagerFactory.algorithm=Spiffe
     ssl.TrustManagerFactory.algorithm=Spiffe
+    #ssl.spiffe.accept=spiffe://example.org/ns/default/sa/client
     ssl.spiffe.acceptAll=true

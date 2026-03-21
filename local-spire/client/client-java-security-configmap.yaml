@@ -5,7 +5,7 @@ metadata:
   namespace: default
 data:
   java-security.properties: |
-    security.provider.2=io.spiffe.provider.SpiffeProvider
+    security.provider.10=io.spiffe.provider.SpiffeProvider
     ssl.KeyManagerFactory.algorithm=Spiffe
     ssl.TrustManagerFactory.algorithm=Spiffe
     ssl.spiffe.acceptAll=true

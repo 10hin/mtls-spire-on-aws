@@ -35,15 +35,11 @@ spec:
           subPath: java-security.properties
         - name: spire-agent-socket
           mountPath: /run/spire/sockets
-        - name: keystore
-          mountPath: /home/cnb/.keystore
       serviceAccountName: backend
       volumes:
       - name: java-security
         configMap:
           name: backend-java-security
-      - name: keystore
-        emptyDir: {}
       - name: spire-agent-socket
         hostPath:
           # path: /run/spire/sockets

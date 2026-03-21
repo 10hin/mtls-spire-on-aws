@@ -2,6 +2,7 @@ package com.example.backend;
 
 import java.security.KeyManagementException;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.net.ssl.KeyManager;
@@ -56,6 +57,10 @@ public class BackendApplication {
 		final var keyManagerFactory = KeyManagerFactory.getInstance(SPIFFE_ALGORITHM, SPIFFE_PROVIDER);
 		final var trustManagerFactory = TrustManagerFactory.getInstance(SPIFFE_ALGORITHM, SPIFFE_PROVIDER);
 		final var spiffeSslBundle = SslBundle.of(null, null, null, SPIFFE_PROTOCOL, SslManagerBundle.of(keyManagerFactory, trustManagerFactory));
+		final var sslSpiffeAccept = Security.getProperty("ssl.spiffe.accept");
+		LOGGER.info("sslSpiffeAccept={}", sslSpiffeAccept);
+		final var sslSpiffeAcceptAll = Security.getProperty("ssl.spiffe.acceptAll");
+		LOGGER.info("sslSpiffeAcceptAll={}", sslSpiffeAcceptAll);
 
 		return (registry) -> {
 			registry.registerBundle("Spiffe", spiffeSslBundle);
@@ -80,6 +85,7 @@ public class BackendApplication {
 				final var certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.UNDEFINED);
 				certificate.setSslContext(this.createTomcatSSLContext(spiffeBundle.createSslContext(), spiffeKeyManagerFactory, spiffeTrustManagerFactory));
 				sslHostConfig.addCertificate(certificate);
+				sslHostConfig.setCertificateVerification("required");
 				connector.addSslHostConfig(sslHostConfig);
 				connector.setSecure(true);
 				connector.setPort(8443);
@@ -88,6 +94,7 @@ public class BackendApplication {
 				if (handler instanceof AbstractHttp11Protocol) {
 					final var http11Handler = (AbstractHttp11Protocol<?>) handler;
 					http11Handler.setSSLEnabled(true);
+					// http11Handler.setClientCertProvider(SPIFFE_PROVIDER);
 				} else {
 					LOGGER.info("protocol handler class is not AbstractHttp11Protocol: {}", handler.getClass());
 				}

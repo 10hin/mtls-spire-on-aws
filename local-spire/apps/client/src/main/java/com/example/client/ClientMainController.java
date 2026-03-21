@@ -1,8 +1,14 @@
 package com.example.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -18,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class ClientMainController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientMainController.class);
 
     private final String backendBaseURL;
     private final RestTemplate backendClient;
@@ -30,10 +37,8 @@ public class ClientMainController {
     ) {
         this.backendBaseURL = baseURL;
         builder.rootUri(this.backendBaseURL);
-        if (sslBundles.getBundleNames().contains("Spiffe")) {
-            final var spiffeBundle = sslBundles.getBundle("Spiffe");
-            builder.sslBundle(spiffeBundle);
-        }
+        final var spiffeBundle = sslBundles.getBundle("Spiffe");
+        builder.sslBundle(spiffeBundle);
         this.backendClient = builder.build();
     }
 
@@ -46,9 +51,17 @@ public class ClientMainController {
     public BackendResponse backend(
         @RequestBody BackendRequest req
     ) {
-        if (Optional.ofNullable(req.getUrl()).orElse("").startsWith(this.backendBaseURL)) {
-            final HttpMethod method = HttpMethod.valueOf(Optional.ofNullable(req.getMethod()).orElse("GET"));
-            return this.backendClient.execute(
+        if (req.getUrl() == null) {
+            return new BackendResponse();
+        }
+        if (!req.getUrl().startsWith(this.backendBaseURL)) {
+            return new BackendResponse();
+        }
+
+        final HttpMethod method = HttpMethod.valueOf(Optional.ofNullable(req.getMethod()).orElse("GET"));
+        BackendResponse respBody;
+        try {
+            respBody = this.backendClient.execute(
                 req.getUrl(),
                 method,
                 (rawReq) -> {
@@ -71,8 +84,21 @@ public class ClientMainController {
                     return resp;
                 }
             );
+        } catch (Exception ex) {
+            final var errorResp = new BackendResponse();
+            errorResp.setUrl(req.getUrl());
+            errorResp.setStatus(-1);
+            errorResp.setContentType("ERROR");
+            try (final var source = new ByteArrayOutputStream(); final var printer = new PrintWriter(new OutputStreamWriter(source, StandardCharsets.UTF_8))) {
+                ex.printStackTrace(printer);
+                printer.flush();
+                errorResp.setBody(source.toString(StandardCharsets.UTF_8));
+            } catch (Throwable t) {
+                LOGGER.error("never thrown exception thrown", t);
+            }
+            return errorResp;
         }
-        return new BackendResponse();
+        return respBody;
     }
 
 }
