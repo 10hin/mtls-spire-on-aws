@@ -39,9 +39,13 @@ kubectl apply -f console-deployment.yaml
 
 # check client app
 kubectl exec -it "$(kubectl get po -l app=console -o name)" -- curl client/hello
+# above command would response successfully
+
 # check backend app
 kubectl exec -it "$(kubectl get po -l app=console -o name)" -- bash -c 'openssl s_client -connect backend.default.svc.cluster.local:443 | openssl x509 -text'
+# above command would show TLS certificate details for backend app
 
 # request client tot backend
 kubectl exec -it "$(kubectl get po -l app=console -o name)" -- curl -XPOST -H 'Content-Type: application/json' -d '{"url":"https://backend.default.svc.cluster.local/hello","method":"GET","body":"","content-type":"application/json"}' http://client.default.svc.cluster.local/backend
+# Currently, above request may FAIL with certificate error like following, between client and backend
 ```
