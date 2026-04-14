@@ -1,0 +1,5 @@
+server:
+  port: 8443
+server2:
+  spiffe:
+    enabled: true

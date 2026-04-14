@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: client2
+client2:
+  spiffe:
+    enabled: false
+  backend:
+    base-url: http://127.0.0.1:8082

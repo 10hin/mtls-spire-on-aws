@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: client2
+  name: client2
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client2
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: client2
+    spec:
+      containers:
+      - env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: kind
+        - name: SPIFFE_ENDPOINT_SOCKET
+          value: unix:/run/spire/sockets/spire-agent.sock
+        image: client2:0.0.1-SNAPSHOT
+        name: client2
+        ports:
+        - containerPort: 8080
+        resources: {}
+        volumeMounts:
+        - name: spire-agent-socket
+          mountPath: /run/spire/sockets
+      serviceAccountName: client2
+      volumes:
+      - name: spire-agent-socket
+        hostPath:
+          # path: /run/spire/sockets
+          path: /run/spire/agent-sockets
+          type: Directory
+status: {}
