@@ -1,0 +1,7 @@
+server:
+  port: 8080
+client3:
+  spiffe:
+    enabled: true
+  backend:
+    base-url: https://server3.default.svc.cluster.local:8443

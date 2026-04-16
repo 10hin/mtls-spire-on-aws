@@ -1,20 +1,17 @@
-package com.example.server2;
+package com.example.server3;
 
 import io.spiffe.provider.SpiffeProvider;
 import io.spiffe.provider.SpiffeSslContextFactory;
 import io.spiffe.spiffeid.SpiffeId;
 import io.spiffe.workloadapi.DefaultX509Source;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.SecureRequestCustomizer;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.jetty.reactive.JettyReactiveWebServerFactory;
 import org.springframework.boot.jetty.servlet.JettyServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 
@@ -23,17 +20,17 @@ import java.security.Security;
 import java.util.Set;
 
 @SpringBootApplication
-public class Server2Application {
+public class Server3Application {
 	static {
 		Security.insertProviderAt(new SpiffeProvider(), 1);
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Server2Application.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Server3Application.class);
 
 	private static final String SPIFFE_PROTOCOL = "TLS";
 
 	public static void main(String[] args) {
-		SpringApplication.run(Server2Application.class, args);
+		SpringApplication.run(Server3Application.class, args);
 	}
 
 	private SSLContext getSpiffeSSLContext() {
@@ -41,7 +38,7 @@ public class Server2Application {
 			final var spiffeSslContextOptions = SpiffeSslContextFactory.SslContextOptions.builder()
 					.sslProtocol(SPIFFE_PROTOCOL)
 					.x509Source(DefaultX509Source.newSource())
-					.acceptedSpiffeIdsSupplier(() -> Set.of(SpiffeId.parse("spiffe://example.org/ns/default/sa/client2")))
+					.acceptedSpiffeIdsSupplier(() -> Set.of(SpiffeId.parse("spiffe://example.org/ns/default/sa/client3")))
 					.build();
 			return SpiffeSslContextFactory.getSslContext(spiffeSslContextOptions);
 		} catch (final Exception e) {
@@ -50,13 +47,13 @@ public class Server2Application {
 	}
 
 	@Bean
-	public JettyServletWebServerFactory jettyFactory(
+	public JettyReactiveWebServerFactory jettyFactory(
 			@Value("${server.port}")
 			final int serverPort,
-			@Value("${server2.spiffe.enabled}")
+			@Value("${server3.spiffe.enabled}")
 			final boolean spiffeEnabled
 	) {
-		final var factory = new JettyServletWebServerFactory();
+		final var factory = new JettyReactiveWebServerFactory();
 		if (spiffeEnabled) {
 			final var spiffeSSLContext = this.getSpiffeSSLContext();
 			factory.addServerCustomizers(server -> {

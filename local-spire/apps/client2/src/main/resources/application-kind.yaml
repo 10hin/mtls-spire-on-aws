@@ -4,4 +4,4 @@ client2:
   spiffe:
     enabled: true
   backend:
-    base-url: https://server2:8443
+    base-url: https://server2.default.svc.cluster.local:8443

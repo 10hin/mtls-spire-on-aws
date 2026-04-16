@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: client2
-  name: client2
+    app: server3
+  name: server3
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: client2
+      app: server3
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: client2
+        app: server3
     spec:
       containers:
         - env:
@@ -24,16 +24,16 @@ spec:
               value: kind
             - name: SPIFFE_ENDPOINT_SOCKET
               value: unix:///run/spire/sockets/spire-agent.sock
-          image: client2:0.0.1-SNAPSHOT
-          name: client2
+          image: server3:0.0.1-SNAPSHOT
+          name: server3
           ports:
-            - containerPort: 8080
+            - containerPort: 8443
           resources: {}
           volumeMounts:
             - name: spire-workload-api
               mountPath: /run/spire/sockets
               readOnly: true
-      serviceAccountName: client2
+      serviceAccountName: server3
       volumes:
         - name: spire-workload-api
           csi:

@@ -19,26 +19,24 @@ spec:
         app: server2
     spec:
       containers:
-      - env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: kind
-        - name: SPIFFE_ENDPOINT_SOCKET
-          value: unix:/run/spire/sockets/spire-agent.sock
-        - name: SERVER_SSL_ENABLED
-          value: 'false'
-        image: server2:0.0.1-SNAPSHOT
-        name: server2
-        ports:
-        - containerPort: 8443
-        resources: {}
-        volumeMounts:
-        - name: spire-agent-socket
-          mountPath: /run/spire/sockets
+        - env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: kind
+            - name: SPIFFE_ENDPOINT_SOCKET
+              value: unix:///run/spire/sockets/spire-agent.sock
+          image: server2:0.0.1-SNAPSHOT
+          name: server2
+          ports:
+            - containerPort: 8443
+          resources: {}
+          volumeMounts:
+            - name: spire-workload-api
+              mountPath: /run/spire/sockets
+              readOnly: true
       serviceAccountName: server2
       volumes:
-      - name: spire-agent-socket
-        hostPath:
-          # path: /run/spire/sockets
-          path: /run/spire/agent-sockets
-          type: Directory
+        - name: spire-workload-api
+          csi:
+            driver: csi.spiffe.io
+            readOnly: true
 status: {}

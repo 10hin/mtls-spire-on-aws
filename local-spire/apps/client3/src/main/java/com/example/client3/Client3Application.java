@@ -1,4 +1,4 @@
-package com.example.client2;
+package com.example.client3;
 
 import io.spiffe.provider.SpiffeProvider;
 import io.spiffe.provider.SpiffeSslContextFactory;
@@ -14,26 +14,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.JettyClientHttpRequestFactory;
-import org.springframework.web.client.RestClient;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.net.ssl.SSLContext;
 import java.security.Security;
 import java.util.Set;
 
 @SpringBootApplication
-public class Client2Application {
+public class Client3Application {
 
 	static {
 		Security.insertProviderAt(new SpiffeProvider(), 1);
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Client2Application.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Client3Application.class);
 
 	private static final String SPIFFE_PROTOCOL = "TLS";
 
 	public static void main(String[] args) {
-		SpringApplication.run(Client2Application.class, args);
+		SpringApplication.run(Client3Application.class, args);
 	}
 
 	private SSLContext getSpiffeSSLContext() {
@@ -41,7 +41,7 @@ public class Client2Application {
 			final var spiffeSslContextOptions = SpiffeSslContextFactory.SslContextOptions.builder()
 					.sslProtocol(SPIFFE_PROTOCOL)
 					.x509Source(DefaultX509Source.newSource())
-					.acceptedSpiffeIdsSupplier(() -> Set.of(SpiffeId.parse("spiffe://example.org/ns/default/sa/server2")))
+					.acceptedSpiffeIdsSupplier(() -> Set.of(SpiffeId.parse("spiffe://example.org/ns/default/sa/server3")))
 					.build();
 			return SpiffeSslContextFactory.getSslContext(spiffeSslContextOptions);
 		} catch (final Exception e) {
@@ -50,14 +50,14 @@ public class Client2Application {
 	}
 
 	@Bean
-	public RestClient backendClient(
-			@Value("${client2.backend.base-url}")
+	public WebClient backendClient(
+			@Value("${client3.backend.base-url}")
 			final String backendBaseURL,
-			@Value("${client2.spiffe.enabled}")
+			@Value("${client3.spiffe.enabled}")
 			final boolean spiffeEnabled,
-			final RestClient.Builder restClientBuilder
+			final WebClient.Builder webClientBuilder
 	) {
-		restClientBuilder.baseUrl(backendBaseURL);
+		webClientBuilder.baseUrl(backendBaseURL);
 		final var clientConnector = new ClientConnector();
 		if (spiffeEnabled) {
 			final var sslContext = this.getSpiffeSSLContext();
@@ -68,8 +68,8 @@ public class Client2Application {
 			clientConnector.setSslContextFactory(sslContextFactory);
 		}
 		final var httpClient = new HttpClient(new HttpClientTransportDynamic(clientConnector));
-		restClientBuilder.requestFactory(new JettyClientHttpRequestFactory(httpClient));
-		return restClientBuilder.build();
+		webClientBuilder.clientConnector(new JettyClientHttpConnector(httpClient));
+		return webClientBuilder.build();
 	}
 
 }
