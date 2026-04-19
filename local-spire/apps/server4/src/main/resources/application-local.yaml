@@ -1,0 +1,5 @@
+server:
+  port: 8086
+server4:
+  spiffe:
+    enabled: false

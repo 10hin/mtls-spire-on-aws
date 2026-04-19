@@ -33,6 +33,33 @@ spec:
             - name: spire-workload-api
               mountPath: /run/spire/sockets
               readOnly: true
+#          startupProbe:
+#            httpGet:
+#              scheme: HTTP
+#              port: 8080
+#              path: /actuator/health/readiness
+#            periodSeconds: 5
+#            successThreshold: 1
+#            failureThreshold: 12
+#            timeoutSeconds: 1
+#          livenessProbe:
+#            httpGet:
+#              scheme: HTTP
+#              port: 8080
+#              path: /actuator/health/liveness
+#            periodSeconds: 5
+#            successThreshold: 1
+#            failureThreshold: 2
+#            timeoutSeconds: 1
+#          readinessProbe:
+#            httpGet:
+#              scheme: HTTP
+#              port: 8080
+#              path: /actuator/health/readiness
+#            periodSeconds: 5
+#            successThreshold: 2
+#            failureThreshold: 5
+#            timeoutSeconds: 1
       serviceAccountName: client3
       volumes:
         - name: spire-workload-api

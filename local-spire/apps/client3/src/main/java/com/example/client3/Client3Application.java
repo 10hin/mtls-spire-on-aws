@@ -3,6 +3,7 @@ package com.example.client3;
 import io.spiffe.provider.SpiffeProvider;
 import io.spiffe.provider.SpiffeSslContextFactory;
 import io.spiffe.spiffeid.SpiffeId;
+import io.spiffe.spiffeid.SpiffeIdUtils;
 import io.spiffe.workloadapi.DefaultX509Source;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.transport.HttpClientTransportDynamic;
@@ -36,12 +37,14 @@ public class Client3Application {
 		SpringApplication.run(Client3Application.class, args);
 	}
 
-	private SSLContext getSpiffeSSLContext() {
+	private SSLContext getSpiffeSSLContext(
+			final Set<SpiffeId> allowedSPIFFEIDs
+	) {
 		try {
 			final var spiffeSslContextOptions = SpiffeSslContextFactory.SslContextOptions.builder()
 					.sslProtocol(SPIFFE_PROTOCOL)
 					.x509Source(DefaultX509Source.newSource())
-					.acceptedSpiffeIdsSupplier(() -> Set.of(SpiffeId.parse("spiffe://example.org/ns/default/sa/server3")))
+					.acceptedSpiffeIdsSupplier(() -> allowedSPIFFEIDs)
 					.build();
 			return SpiffeSslContextFactory.getSslContext(spiffeSslContextOptions);
 		} catch (final Exception e) {
@@ -55,12 +58,15 @@ public class Client3Application {
 			final String backendBaseURL,
 			@Value("${client3.spiffe.enabled}")
 			final boolean spiffeEnabled,
+			@Value("${client3.spiffe.allowed-ids:}")
+			final String pipeSeparatedAllowedSPIFFEIDs,
 			final WebClient.Builder webClientBuilder
 	) {
 		webClientBuilder.baseUrl(backendBaseURL);
 		final var clientConnector = new ClientConnector();
 		if (spiffeEnabled) {
-			final var sslContext = this.getSpiffeSSLContext();
+			final Set<SpiffeId> allowedSPIFFEIDs = SpiffeIdUtils.toSetOfSpiffeIds(pipeSeparatedAllowedSPIFFEIDs);
+			final var sslContext = this.getSpiffeSSLContext(allowedSPIFFEIDs);
 			final var sslContextFactory = new SslContextFactory.Client();
 			sslContextFactory.setSslContext(sslContext);
 			sslContextFactory.setEndpointIdentificationAlgorithm(null);

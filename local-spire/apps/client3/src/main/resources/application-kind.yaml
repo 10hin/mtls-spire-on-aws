@@ -3,5 +3,6 @@ server:
 client3:
   spiffe:
     enabled: true
+    allowed-ids: 'spiffe://example.org/ns/default/sa/server3'
   backend:
-    base-url: https://server3.default.svc.cluster.local:8443
+    base-url: https://server3.default.svc:8443

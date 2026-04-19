@@ -1,0 +1,6 @@
+server:
+  port: 8443
+server4:
+  spiffe:
+    enabled: true
+    allowed-ids: 'spiffe://example.org/ns/default/sa/client4'

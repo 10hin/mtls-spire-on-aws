@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: server4
+  name: server4
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server4
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: server4
+    spec:
+      containers:
+        - env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: kind
+            - name: SPIFFE_ENDPOINT_SOCKET
+              value: unix:///run/spire/sockets/spire-agent.sock
+          image: server4:0.0.1-SNAPSHOT
+          name: server4
+          ports:
+            - containerPort: 8443
+          resources: {}
+          volumeMounts:
+            - name: spire-workload-api
+              mountPath: /run/spire/sockets
+              readOnly: true
+#          startupProbe:
+#            httpGet:
+#              scheme: HTTPS
+#              port: 8443
+#              path: /actuator/health/readiness
+#            periodSeconds: 5
+#            successThreshold: 1
+#            failureThreshold: 12
+#            timeoutSeconds: 1
+#          livenessProbe:
+#            httpGet:
+#              scheme: HTTPS
+#              port: 8443
+#              path: /actuator/health/liveness
+#            periodSeconds: 5
+#            successThreshold: 1
+#            failureThreshold: 2
+#            timeoutSeconds: 1
+#          readinessProbe:
+#            httpGet:
+#              scheme: HTTPS
+#              port: 8443
+#              path: /actuator/health/readiness
+#            periodSeconds: 5
+#            successThreshold: 2
+#            failureThreshold: 5
+#            timeoutSeconds: 1
+      serviceAccountName: server4
+      volumes:
+        - name: spire-workload-api
+          csi:
+            driver: csi.spiffe.io
+            readOnly: true
+status: {}
