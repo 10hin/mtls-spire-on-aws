@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.jetty.reactive.JettyReactiveWebServerFactory;
-import org.springframework.boot.jetty.servlet.JettyServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 
 import javax.net.ssl.SSLContext;

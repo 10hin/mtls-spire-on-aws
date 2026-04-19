@@ -3,4 +3,4 @@ server:
 server2:
   spiffe:
     enabled: true
-    allowed-ids: 'spiffe:example.org/ns/default/sa/client2'
+    allowed-ids: 'spiffe://example.org/ns/default/sa/client2'

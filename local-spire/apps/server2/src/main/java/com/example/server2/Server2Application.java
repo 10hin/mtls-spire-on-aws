@@ -5,18 +5,15 @@ import io.spiffe.provider.SpiffeSslContextFactory;
 import io.spiffe.spiffeid.SpiffeId;
 import io.spiffe.spiffeid.SpiffeIdUtils;
 import io.spiffe.workloadapi.DefaultX509Source;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.SecureRequestCustomizer;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.jetty.servlet.JettyServletWebServerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
+import org.springframework.boot.jetty.JettyServerCustomizer;
 import org.springframework.context.annotation.Bean;
 
 import javax.net.ssl.SSLContext;
@@ -53,43 +50,38 @@ public class Server2Application {
 	}
 
 	@Bean
-	public JettyServletWebServerFactory jettyFactory(
+	@ConditionalOnBooleanProperty("server2.spiffe.enabled")
+	public JettyServerCustomizer jettyServerCustomizer(
 			@Value("${server.port}")
 			final int serverPort,
-			@Value("${server2.spiffe.enabled}")
-			final boolean spiffeEnabled,
-			@Value("${server2.spiffe.allowed-ids:}")
+			@Value("${server2.spiffe.allowed-ids}")
 			final String pipeSeparatedAllowedSPIFFEIDs
 	) {
-		final var factory = new JettyServletWebServerFactory();
-		if (spiffeEnabled) {
-			final Set<SpiffeId> allowedSPIFFEIDs = SpiffeIdUtils.toSetOfSpiffeIds(pipeSeparatedAllowedSPIFFEIDs);
-			final var spiffeSSLContext = this.getSpiffeSSLContext(allowedSPIFFEIDs);
-			factory.addServerCustomizers(server -> {
-				for (final var connector : server.getConnectors()) {
-					server.removeConnector(connector);
-				}
-				final var sslContextFactory = new SslContextFactory.Server();
-				sslContextFactory.setSslContext(spiffeSSLContext);
-				sslContextFactory.setNeedClientAuth(true);
+		final Set<SpiffeId> allowedSPIFFEIDs = SpiffeIdUtils.toSetOfSpiffeIds(pipeSeparatedAllowedSPIFFEIDs);
+		final var spiffeSSLContext = this.getSpiffeSSLContext(allowedSPIFFEIDs);
+		return server -> {
+			for (final var connector : server.getConnectors()) {
+				server.removeConnector(connector);
+			}
+			final var sslContextFactory = new SslContextFactory.Server();
+			sslContextFactory.setSslContext(spiffeSSLContext);
+			sslContextFactory.setNeedClientAuth(true);
 //				sslContextFactory.setSniRequired(false);
-				LOGGER.info("sslContextFactory.isSniRequired(): {}", sslContextFactory.isSniRequired());
+			LOGGER.info("sslContextFactory.isSniRequired(): {}", sslContextFactory.isSniRequired());
 //				sslContextFactory.setEndpointIdentificationAlgorithm(null);
-				LOGGER.info("sslContextFactory.getEndpointIdentificationAlgorithm(): {}", sslContextFactory.getEndpointIdentificationAlgorithm());
-				final var httpsConfig = new HttpConfiguration();
-				final var secureRequestCustomizer = new SecureRequestCustomizer();
+			LOGGER.info("sslContextFactory.getEndpointIdentificationAlgorithm(): {}", sslContextFactory.getEndpointIdentificationAlgorithm());
+			final var httpsConfig = new HttpConfiguration();
+			final var secureRequestCustomizer = new SecureRequestCustomizer();
 //				secureRequestCustomizer.setSniHostCheck(false);
-				httpsConfig.addCustomizer(secureRequestCustomizer);
-				final var sslConnector = new ServerConnector(
-						server,
-						new SslConnectionFactory(sslContextFactory, "http/1.1"),
-						new HttpConnectionFactory(httpsConfig)
-				);
-				sslConnector.setPort(serverPort);
-				server.addConnector(sslConnector);
-			});
-		}
-		return factory;
+			httpsConfig.addCustomizer(secureRequestCustomizer);
+			final var sslConnector = new ServerConnector(
+					server,
+					new SslConnectionFactory(sslContextFactory, "http/1.1"),
+					new HttpConnectionFactory(httpsConfig)
+			);
+			sslConnector.setPort(serverPort);
+			server.addConnector(sslConnector);
+		};
 	}
 
 }
