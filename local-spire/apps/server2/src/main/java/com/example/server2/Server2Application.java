@@ -66,13 +66,10 @@ public class Server2Application {
 			final var sslContextFactory = new SslContextFactory.Server();
 			sslContextFactory.setSslContext(spiffeSSLContext);
 			sslContextFactory.setNeedClientAuth(true);
-//				sslContextFactory.setSniRequired(false);
 			LOGGER.info("sslContextFactory.isSniRequired(): {}", sslContextFactory.isSniRequired());
-//				sslContextFactory.setEndpointIdentificationAlgorithm(null);
 			LOGGER.info("sslContextFactory.getEndpointIdentificationAlgorithm(): {}", sslContextFactory.getEndpointIdentificationAlgorithm());
 			final var httpsConfig = new HttpConfiguration();
 			final var secureRequestCustomizer = new SecureRequestCustomizer();
-//				secureRequestCustomizer.setSniHostCheck(false);
 			httpsConfig.addCustomizer(secureRequestCustomizer);
 			final var sslConnector = new ServerConnector(
 					server,

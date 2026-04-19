@@ -51,7 +51,7 @@ public class Server4Application {
 	@Bean
 	@ConditionalOnBooleanProperty("server4.spiffe.enabled")
 	public NettyServerCustomizer nettyServerCustomizer(
-			@Value("${server4.spiffe.allowed-ids:}")
+			@Value("${server4.spiffe.allowed-ids}")
 			final String pipeSeparatedAllowedSPIFFEIDs
 	) {
 		LOGGER.info("Server Customizer for enabling SPIFFE");
