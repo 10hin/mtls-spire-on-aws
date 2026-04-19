@@ -86,12 +86,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<image>
-						<name>${aws.accountID}.dkr.ecr.${aws.region}.amazonaws.com/mtls-spire-on-aws/local-spire/${project.artifactId}:${project.version}</name>
-						<publish>true</publish>
-					</image>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
