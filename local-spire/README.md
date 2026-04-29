@@ -135,8 +135,8 @@ kubectl exec -it "$(kubectl get po -l app=console -o name)" -- curl -XPOST http:
 | `server2` |     sync/mvc     |           Jetty            |
 | `server3` |     reactive     |           Jetty            |
 | `server4` |     reactive     |           Netty            |
-| `server2` |     sync/mvc     |       Apatche Tomcat       |
-| `server3` |     reactive     |       Apatche Tomcat       |
+| `server2` |     sync/mvc     |       Apache Tomcat        |
+| `server3` |     reactive     |       Apache Tomcat        |
 
 
 
