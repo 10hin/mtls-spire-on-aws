@@ -6,10 +6,7 @@ import io.spiffe.spiffeid.SpiffeId;
 import io.spiffe.spiffeid.SpiffeIdUtils;
 import io.spiffe.workloadapi.DefaultX509Source;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.core5.http.nio.ssl.BasicClientTlsStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +15,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.net.ssl.SSLContext;

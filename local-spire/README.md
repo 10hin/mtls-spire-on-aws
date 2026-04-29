@@ -120,11 +120,34 @@ kubectl exec -it "$(kubectl get po -l app=console -o name)" -- curl -XPOST http:
 
 ## Notes
 
+### Each app description
+
+|           | application type |  HTTP client library  |
+|:---------:|:----------------:|:---------------------:|
+| `client2` |     sync/mvc     |         Jetty         |
+| `client3` |     reactive     |         Jetty         |
+| `client4` |     reactive     |         Netty         |
+| `client5` |     sync/mvc     | Apache HttpComponents |
+| `client6` |     reactive     | Apache HttpComponents |
+
+|           | application type | HTTP server implementation |
+|:---------:|:----------------:|:--------------------------:|
+| `server2` |     sync/mvc     |           Jetty            |
+| `server3` |     reactive     |           Jetty            |
+| `server4` |     reactive     |           Netty            |
+| `server2` |     sync/mvc     |       Apatche Tomcat       |
+| `server3` |     reactive     |       Apatche Tomcat       |
+
+
+
 ### Using `java-spiffe-provider` package
 
 - Implementation
+  - Must run `SpiffeProvider.install()`.
+    - When you run test with maven/gradle plugin, SpringApplication-class's `public static void main(String[])` method not called. You need calling `SpiffeProvider.install()` in SpringApplication-class's
   - Use `SpiffeSslContextFactory.getSslContext(SslContextOptions)` to get `SSLContext`.
-  - Use Jetty as embedded web server, not Tomcat.
+  - Use `KeyManagerFactory.getInstance("Spiffe",)`/`TrustManagerFactory.getInstance("Spiffe")` to get `KeyManagerFactory`/`KeyManager`/`TrustManagerFactory`/`TrustManager` instance.
+  - Configure TLS by web server implementation specific way.
 - Test implementation
   - When application started with maven/gradle plugin in tests, main-method would not called, thus, `SpiffeProvider.install()` code in main-method will not work while tests.
     - If you want to run tests with `SpiffeProvider.install()`, call it in static initializer of `@SpringApplication` class.

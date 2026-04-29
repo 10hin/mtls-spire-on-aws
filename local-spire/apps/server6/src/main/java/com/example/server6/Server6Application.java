@@ -18,8 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
-import org.springframework.boot.tomcat.reactive.TomcatReactiveWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.context.annotation.Bean;
 
 import javax.net.ssl.X509KeyManager;
@@ -67,29 +66,25 @@ public class Server6Application {
 
 	@Bean
 	@ConditionalOnBooleanProperty("server6.spiffe.enabled")
-	public WebServerFactoryCustomizer<TomcatReactiveWebServerFactory> tomcatWebServerFactoryCustomizerForSpiffe(
+	public TomcatProtocolHandlerCustomizer<Http11NioProtocol> tomcatProtocolHandlerCustomizer(
 			@Value("${server6.spiffe.allowed-ids}")
 			final String pipeSeparatedAllowedSPIFFEIDs
 	) {
 		final Set<SpiffeId> allowedSPIFFEIDs = SpiffeIdUtils.toSetOfSpiffeIds(pipeSeparatedAllowedSPIFFEIDs);
 		final var spiffeSSLContext = this.getSpiffeSSLContext(allowedSPIFFEIDs);
-		return factory -> {
-			LOGGER.info("WebServerFactoryCustomizer<TomcatWebServerFactory> called!");
-			factory.addConnectorCustomizers(connector -> {
-				LOGGER.info("TomcatConnectorCustomizer called!");
-				final var protocol = (Http11NioProtocol) connector.getProtocolHandler();
-				protocol.setSSLEnabled(true);
-				final var sslHostConfig = new SSLHostConfig();
-				sslHostConfig.setProtocols("TLSv1.2,TLSv1.3");
-				sslHostConfig.setCertificateVerification("required");
-				final var cert = new SSLHostConfigCertificate(
-						sslHostConfig,
-						SSLHostConfigCertificate.Type.UNDEFINED
-				);
-				cert.setSslContext(spiffeSSLContext);
-				sslHostConfig.addCertificate(cert);
-				protocol.addSslHostConfig(sslHostConfig);
-			});
+		return protocol -> {
+			LOGGER.info("TomcatProtocolHandlerCustomizer called");
+			protocol.setSSLEnabled(true);
+			final var sslHostConfig = new SSLHostConfig();
+			sslHostConfig.setProtocols("TLSv1.2,TLSv1.3");
+			sslHostConfig.setCertificateVerification("required");
+			final var cert = new SSLHostConfigCertificate(
+					sslHostConfig,
+					SSLHostConfigCertificate.Type.UNDEFINED
+			);
+			cert.setSslContext(spiffeSSLContext);
+			sslHostConfig.addCertificate(cert);
+			protocol.addSslHostConfig(sslHostConfig);
 		};
 	}
 
