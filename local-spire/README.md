@@ -144,7 +144,7 @@ kubectl exec -it "$(kubectl get po -l app=console -o name)" -- curl -XPOST http:
 
 - Implementation
   - Must run `SpiffeProvider.install()`.
-    - When you run test with maven/gradle plugin, SpringApplication-class's `public static void main(String[])` method not called. You need calling `SpiffeProvider.install()` in SpringApplication-class's
+    - When you run test with maven/gradle plugin, SpringApplication-class's `public static void main(String[])` method not called. You need calling `SpiffeProvider.install()` in SpringApplication-class's static initializer.
   - Use `SpiffeSslContextFactory.getSslContext(SslContextOptions)` to get `SSLContext`.
   - Use `KeyManagerFactory.getInstance("Spiffe",)`/`TrustManagerFactory.getInstance("Spiffe")` to get `KeyManagerFactory`/`KeyManager`/`TrustManagerFactory`/`TrustManager` instance.
   - Configure TLS by web server implementation specific way.
