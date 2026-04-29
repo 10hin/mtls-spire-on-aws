@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: server6
+server6:
+  spiffe:
+    enabled: false

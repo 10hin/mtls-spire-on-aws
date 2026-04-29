@@ -1,4 +1,4 @@
-package com.example.client2;
+package com.example.client5;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
 @RestController
-public class Client2Controller {
+public class Client5Controller {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Client2Controller.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Client5Controller.class);
 
     private final RestClient backendClient;
 
-    public Client2Controller(
+    public Client5Controller(
             final RestClient backendClient
     ) {
 
@@ -24,7 +24,7 @@ public class Client2Controller {
 
     @GetMapping("/hello")
     public String hello() {
-        return "Hello, World! (from client2)";
+        return "Hello, World! (from client5)";
     }
 
     @PostMapping("/backend")

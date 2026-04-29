@@ -2,7 +2,7 @@ apiVersion: spire.spiffe.io/v1alpha1
 kind: ClusterSPIFFEID
 metadata:
   creationTimestamp: null
-  name: server4
+  name: client5
 spec:
   className: spire-server-spire
   namespaceSelector:
@@ -10,8 +10,8 @@ spec:
       kubernetes.io/metadata.name: default
   podSelector:
     matchLabels:
-      app: server4
+      app: client5
   spiffeIDTemplate: spiffe://{{ .TrustDomain }}/ns/{{ .PodMeta.Namespace }}/sa/{{ .PodSpec.ServiceAccountName }}
   autoPopulateDNSNames: true
   fallback: false
-  hint: server4
+  hint: client5

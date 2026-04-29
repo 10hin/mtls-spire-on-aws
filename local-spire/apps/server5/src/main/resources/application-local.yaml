@@ -1,0 +1,5 @@
+server:
+  port: 8088
+server5:
+  spiffe:
+    enabled: false

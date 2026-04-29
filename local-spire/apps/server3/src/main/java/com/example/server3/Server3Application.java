@@ -22,6 +22,7 @@ import java.util.Set;
 
 @SpringBootApplication
 public class Server3Application {
+
 	static {
 		Security.insertProviderAt(new SpiffeProvider(), 1);
 	}

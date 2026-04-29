@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: client6
+client6:
+  spiffe:
+    enabled: false
+  backend:
+    base-url: http://127.0.0.1:8090

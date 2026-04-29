@@ -1,0 +1,8 @@
+server:
+  port: 8080
+client6:
+  spiffe:
+    enabled: true
+    allowed-ids: 'spiffe://example.org/ns/default/sa/server6'
+  backend:
+    base-url: https://server6.default.svc:8443
